@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+backend/venv311/
+*.pkl
+*.pt
+*.bin
+
+# Node
+node_modules/
+dist/
+.next/
+
+# Env
+.env
+.env.local
+*.env
+
+# Data
+data/raw/
+data/processed/
+ml/sentiment/model/
+ml/churn/model.pkl
+*.csv
+*.parquet
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+.coverage
+htmlcov/
+.pytest_cache/

@@ -1,0 +1,1 @@
+[{"session_id": "244a7794-90d0-484f-8af3-f239e8d194ee", "channel": "web", "intent": "request_action", "sentiment": "frustrated", "resolved": true, "handle_time": 12.91, "ts": 1780892106.2102015}, {"session_id": "244a7794-90d0-484f-8af3-f239e8d194ee", "channel": "web", "intent": "query", "sentiment": "neutral", "resolved": true, "handle_time": 9.3, "ts": 1780892124.7837172}]
