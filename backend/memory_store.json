@@ -1,0 +1,135 @@
+{
+  "sessions": {
+    "00c988f7-5b84-4a1c-b87b-cbdbcec07589": [
+      {
+        "ts": 1781137422.6979911,
+        "channel": "web",
+        "role": "user",
+        "content": "Hi im ana",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781137422.6979911,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Hi Ana! It's great to meet you. How can I help you today?"
+      }
+    ],
+    "77363ce9-445e-44f5-b609-66e57171a8b7": [
+      {
+        "ts": 1781137762.5252485,
+        "channel": "web",
+        "role": "user",
+        "content": "hi im ana",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781137762.5252485,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Hi Ana! It is wonderful to meet you. \n\nI want to let you know honestly that my knowledge base is currently unavailable, so I don't have access to any information to assist you right now. Please let me know how I can help once everything is back up and running!"
+      }
+    ],
+    "52be6999-62a5-4a15-a5e0-951a30cabae9": [
+      {
+        "ts": 1781154000.8558538,
+        "channel": "web",
+        "role": "user",
+        "content": "what is my name",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781154000.8558538,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I don't have access to your personal profile details in this current chat view. If you are logged into your account, I can help you look that up, or you can simply let me know what you'd like me to call you!"
+      }
+    ],
+    "557575e5-671e-4be8-be73-77a5d57176cf": [
+      {
+        "ts": 1781433599.0085182,
+        "channel": "web",
+        "role": "user",
+        "content": "hi im anika",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781433599.0085182,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Hi Anika! It is so nice to meet you. \n\nI wanted to let you know that my knowledge base is currently unavailable, so I don't have access to any information to assist you at the moment. I am so sorry for the inconvenience!"
+      },
+      {
+        "ts": 1781433624.1055913,
+        "channel": "web",
+        "role": "user",
+        "content": "what is my name",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781433624.1055913,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Hello! I'm so sorry, but I don't have access to your information right now as the knowledge base is currently unavailable, so I'm unable to tell you your name. \n\nIf there is anything else I can help you with, please let me know!"
+      }
+    ],
+    "157461e5-08b6-43e0-909a-74e4dc5b3206": [
+      {
+        "ts": 1781433760.2477534,
+        "channel": "web",
+        "role": "user",
+        "content": "imanika",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781433760.2477534,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Hello! I'm so sorry, but our knowledge base is currently unavailable, so I don't have any information to help answer your question about \"imanika\" right now. \n\nIf there is anything else I can try to assist you with, please let me know!"
+      },
+      {
+        "ts": 1781433792.9570234,
+        "channel": "web",
+        "role": "user",
+        "content": "my name is ana",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781433792.9570234,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Oh, I see! Hello Ana, thank you for clarifying. I apologize for the misunderstanding earlier. It is wonderful to meet you! How can I help you today?"
+      },
+      {
+        "ts": 1781433817.1284382,
+        "channel": "web",
+        "role": "user",
+        "content": "what is my name",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781433817.1284382,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Your name is Ana! How can I help you today, Ana?"
+      }
+    ]
+  },
+  "customers": {
+    "demo-customer-001": [
+      "00c988f7-5b84-4a1c-b87b-cbdbcec07589",
+      "77363ce9-445e-44f5-b609-66e57171a8b7",
+      "52be6999-62a5-4a15-a5e0-951a30cabae9",
+      "557575e5-671e-4be8-be73-77a5d57176cf",
+      "157461e5-08b6-43e0-909a-74e4dc5b3206"
+    ]
+  }
+}

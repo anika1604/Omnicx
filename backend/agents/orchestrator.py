@@ -1,17 +1,11 @@
 """
 Orchestrator Agent — the LangGraph-powered master router.
-
-Responsibilities:
-  1. Classify customer intent from the incoming message
-  2. Stitch cross-channel context from the memory store
-  3. Fan out to specialist agents in parallel
-  4. Merge results and compose the final response
-  5. Write updated context back to memory
 """
 from __future__ import annotations
-from typing import Annotated, TypedDict
+from typing import TypedDict
 import asyncio
 import json
+import re
 
 from langgraph.graph import StateGraph, END
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -32,13 +26,13 @@ SYSTEM_PROMPT = """You are the OmniCX Orchestrator — a world-class customer ex
 Your job:
 1. Understand the customer's INTENT (from: query | complaint | request_action | feedback | churn_signal)
 2. Identify which specialist agents to invoke
-3. Compose a warm, helpful, channel-appropriate response
+3. Compose a warm, helpful, channel-appropriate response using the conversation history
 
-Always output valid JSON:
+Always output valid JSON with no markdown:
 {
   "intent": "<intent_label>",
   "sentiment_label": "<positive|neutral|negative|frustrated>",
-  "agents_needed": ["knowledge", "action", "escalation"],  // subset
+  "agents_needed": ["knowledge"],
   "draft_response": "<your response to the customer>",
   "confidence": 0.95
 }"""
@@ -72,36 +66,48 @@ class OrchestratorAgent:
 
     def _build_graph(self) -> StateGraph:
         graph = StateGraph(OrchestratorState)
-
-        graph.add_node("classify",          self._classify_node)
-        graph.add_node("run_specialists",   self._specialists_node)
-        graph.add_node("compose_response",  self._compose_node)
-        graph.add_node("write_memory",      self._memory_node)
-
+        graph.add_node("classify",         self._classify_node)
+        graph.add_node("run_specialists",  self._specialists_node)
+        graph.add_node("compose_response", self._compose_node)
+        graph.add_node("write_memory",     self._memory_node)
         graph.set_entry_point("classify")
         graph.add_edge("classify",         "run_specialists")
         graph.add_edge("run_specialists",  "compose_response")
         graph.add_edge("compose_response", "write_memory")
         graph.add_edge("write_memory",     END)
-
         return graph.compile()
 
     async def _classify_node(self, state: OrchestratorState) -> OrchestratorState:
-        """Use LLM to classify intent and decide which agents to invoke."""
         inp = state["inp"]
-        history_ctx = json.dumps(inp.history[-6:], indent=2)  # last 3 turns
+
+        # Build conversation history string
+        history_lines = []
+        for turn in inp.history[-10:]:
+            role = "Customer" if turn.get("role") == "user" else "Agent"
+            history_lines.append(f"{role}: {turn.get('content', '')}")
+        history_ctx = "\n".join(history_lines) if history_lines else "No previous conversation."
 
         messages = [
             SystemMessage(content=SYSTEM_PROMPT),
             HumanMessage(content=(
-                f"Channel: {inp.channel}\n"
-                f"Customer history (last 3 turns):\n{history_ctx}\n\n"
-                f"New message: {inp.message}"
+                f"Channel: {inp.channel}\n\n"
+                f"Previous conversation:\n{history_ctx}\n\n"
+                f"New message from customer: {inp.message}\n\n"
+                f"Use the conversation history to personalize your response. "
+                f"If the customer mentioned their name, use it."
             )),
         ]
 
-        response = await asyncio.get_event_loop().run_in_executor(None, self.llm.invoke, messages)
-        parsed = json.loads(response.content)
+        response = await asyncio.get_event_loop().run_in_executor(
+            None, self.llm.invoke, messages
+        )
+
+        try:
+            raw = response.content
+            match = re.search(r'\{.*\}', raw, re.DOTALL)
+            parsed = json.loads(match.group() if match else raw)
+        except Exception:
+            parsed = {}
 
         return {
             **state,
@@ -112,15 +118,14 @@ class OrchestratorAgent:
         }
 
     async def _specialists_node(self, state: OrchestratorState) -> OrchestratorState:
-        """Fan out to specialist agents in parallel."""
-        inp = state["inp"]
+        inp    = state["inp"]
         needed = state["agents_needed"]
 
         agent_map = {
-            "sentiment":       self.sentiment_agent,
-            "knowledge":       self.knowledge_agent,
-            "escalation":      self.escalation_agent,
-            "action":          self.action_agent,
+            "sentiment":  self.sentiment_agent,
+            "knowledge":  self.knowledge_agent,
+            "escalation": self.escalation_agent,
+            "action":     self.action_agent,
         }
 
         tasks = {
@@ -139,17 +144,14 @@ class OrchestratorAgent:
         return {**state, "specialist_outputs": outputs}
 
     async def _compose_node(self, state: OrchestratorState) -> OrchestratorState:
-        """Merge specialist outputs into a final response."""
         outputs = state["specialist_outputs"]
         draft   = state["draft_response"]
 
-        # Enrich draft with knowledge agent answer if available
         if "knowledge" in outputs and outputs["knowledge"].get("answer"):
             final = outputs["knowledge"]["answer"]
         else:
-            final = draft
+            final = draft if draft else "How can I help you today?"
 
-        # Check escalation flag
         should_escalate = (
             "escalation" in outputs
             and outputs["escalation"].get("should_escalate", False)
@@ -160,7 +162,6 @@ class OrchestratorAgent:
         return {**state, "final_response": final, "should_escalate": should_escalate}
 
     async def _memory_node(self, state: OrchestratorState) -> OrchestratorState:
-        """Persist interaction to the unified memory graph."""
         await self.memory.upsert_interaction(
             session_id=state["inp"].session_id,
             customer_id=state["inp"].customer_id,
@@ -173,7 +174,6 @@ class OrchestratorAgent:
         return state
 
     async def run(self, inp: AgentInput) -> dict:
-        """Public entry point — returns the full orchestrated result."""
         initial_state: OrchestratorState = {
             "inp":                inp,
             "intent":             "",

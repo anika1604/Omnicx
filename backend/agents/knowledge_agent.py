@@ -1,9 +1,4 @@
-"""
-Knowledge Agent — RAG pipeline over the company knowledge base.
-
-Flow: embed query → ChromaDB similarity search → LLM with retrieved context → answer
-"""
-
+"""Knowledge Agent — RAG pipeline over the company knowledge base."""
 import asyncio
 from agents.base_agent import BaseAgent, AgentInput, AgentOutput
 from config import get_settings
@@ -11,11 +6,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
 settings = get_settings()
-
-RAG_SYSTEM = """You are a knowledgeable customer support agent.
-Answer the customer's question using ONLY the provided context.
-If the context doesn't contain the answer, say so honestly.
-Be concise, warm, and helpful. Do not make things up."""
 
 
 class KnowledgeAgent(BaseAgent):
@@ -28,39 +18,64 @@ class KnowledgeAgent(BaseAgent):
             transport="rest",
             temperature=0.2,
         )
-        self._vector_store = None
 
-    def _get_vector_store(self):
-        if self._vector_store is None:
+    async def _execute(self, inp: AgentInput) -> AgentOutput:
+        # Try ChromaDB — silently skip if unavailable
+        context = ""
+        sources = 0
+        try:
             import chromadb
             from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
             client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
             ef = SentenceTransformerEmbeddingFunction(model_name=settings.embedding_model)
-            self._vector_store = client.get_or_create_collection(
-                name=settings.chroma_collection,
-                embedding_function=ef,
-            )
-        return self._vector_store
-
-    async def _execute(self, inp: AgentInput) -> AgentOutput:
-        # Retrieve relevant chunks
-        try:
-            collection = self._get_vector_store()
-            results = collection.query(query_texts=[inp.message], n_results=4)
+            collection = client.get_or_create_collection(name=settings.chroma_collection, embedding_function=ef)
+            results = collection.query(query_texts=[inp.message], n_results=3)
             docs = results.get("documents", [[]])[0]
-            context = "\n\n---\n\n".join(docs) if docs else "No relevant documents found."
+            if docs:
+                context = "\n\n".join(docs)
+                sources = len(docs)
         except Exception:
-            context = "Knowledge base unavailable."
+            pass  # No KB available — use conversation history only
 
-        # Generate grounded response
+        # Build history string
+        history_lines = []
+        for turn in inp.history[-10:]:
+            role = "Customer" if turn.get("role") == "user" else "Agent"
+            history_lines.append(f"{role}: {turn.get('content', '')}")
+        history_ctx = "\n".join(history_lines) if history_lines else ""
+
+        # System prompt — use KB if available, otherwise use history
+        if context:
+            system = (
+                "You are a helpful customer support agent. "
+                "Answer using the context below. If the answer isn't in the context, use your general knowledge.\n\n"
+                f"Knowledge Base:\n{context}"
+            )
+        else:
+            system = (
+                "You are a helpful customer support agent. "
+                "Use the conversation history to personalize your response. "
+                "If the customer mentioned their name, use it. "
+                "Answer helpfully from your general knowledge."
+            )
+
+        # Build messages
+        content = ""
+        if history_ctx:
+            content += f"Conversation so far:\n{history_ctx}\n\n"
+        content += f"Customer: {inp.message}"
+
         messages = [
-            SystemMessage(content=RAG_SYSTEM),
-            HumanMessage(content=f"Context:\n{context}\n\nCustomer question: {inp.message}"),
+            SystemMessage(content=system),
+            HumanMessage(content=content),
         ]
-        response = await asyncio.get_event_loop().run_in_executor(None, self.llm.invoke, messages)
+
+        response = await asyncio.get_event_loop().run_in_executor(
+            None, self.llm.invoke, messages
+        )
 
         return AgentOutput(
             agent_name=self.name,
-            result={"answer": response.content, "sources_used": len(docs) if "docs" in dir() else 0},
+            result={"answer": response.content, "sources_used": sources},
             confidence=0.9,
         )
