@@ -31,6 +31,7 @@ export default function ChatDemo() {
   const [sessionId,  setSessionId]  = useState<string | null>(null)
   const [loading,    setLoading]    = useState(false)
   const [wsStatus,   setWsStatus]   = useState<'connected' | 'disconnected'>('disconnected')
+  const [ratings, setRatings] = useState<Record<string, 'up' | 'down'>>({})
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -78,6 +79,23 @@ export default function ChatDemo() {
       setLoading(false)
     }
   }
+
+  const submitRating = async (messageId: string, score: 'up' | 'down') => {
+  setRatings(prev => ({ ...prev, [messageId]: score }))
+  try {
+    await fetch('/api/v1/feedback/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sessionId || 'unknown',
+        csat_score: score === 'up' ? 5.0 : 1.0,
+        comment: score === 'up' ? 'Helpful' : 'Not helpful',
+      }),
+    })
+  } catch {
+    console.error('Failed to submit rating')
+  }
+}
 
   return (
     <div className="flex h-full flex-col">
@@ -129,24 +147,57 @@ export default function ChatDemo() {
                 {msg.content}
               </div>
               {msg.role === 'assistant' && (
-                <div className="flex gap-1.5 flex-wrap">
-                  {msg.intent && (
-                    <span className="text-xs bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full">
-                      {msg.intent}
-                    </span>
-                  )}
-                  {msg.sentiment && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${SENTIMENT_COLORS[msg.sentiment] || 'bg-gray-100'}`}>
-                      {msg.sentiment}
-                    </span>
-                  )}
-                  {msg.escalate && (
-                    <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                      🚨 escalated
-                    </span>
-                  )}
-                </div>
-              )}
+  <div className="flex items-center gap-2 flex-wrap">
+    {msg.intent && (
+      <span className="text-xs bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full">
+        {msg.intent}
+      </span>
+    )}
+    {msg.sentiment && (
+      <span className={`text-xs px-2 py-0.5 rounded-full ${SENTIMENT_COLORS[msg.sentiment] || 'bg-gray-100'}`}>
+        {msg.sentiment}
+      </span>
+    )}
+    {msg.escalate && (
+      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+        🚨 escalated
+      </span>
+    )}
+    <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
+      <button
+        onClick={() => submitRating(msg.id, 'up')}
+        disabled={!!ratings[msg.id]}
+        className={`text-sm px-2 py-0.5 rounded-full transition-colors ${
+          ratings[msg.id] === 'up'
+            ? 'bg-emerald-100 text-emerald-600'
+            : ratings[msg.id] === 'down'
+            ? 'text-gray-300 cursor-not-allowed'
+            : 'text-gray-400 hover:bg-emerald-50 hover:text-emerald-600'
+        }`}
+      >
+        👍
+      </button>
+      <button
+        onClick={() => submitRating(msg.id, 'down')}
+        disabled={!!ratings[msg.id]}
+        className={`text-sm px-2 py-0.5 rounded-full transition-colors ${
+          ratings[msg.id] === 'down'
+            ? 'bg-red-100 text-red-600'
+            : ratings[msg.id] === 'up'
+            ? 'text-gray-300 cursor-not-allowed'
+            : 'text-gray-400 hover:bg-red-50 hover:text-red-600'
+        }`}
+      >
+        👎
+      </button>
+      {ratings[msg.id] && (
+        <span className="text-xs text-gray-400 ml-1">
+          {ratings[msg.id] === 'up' ? 'Thanks!' : 'Sorry about that!'}
+        </span>
+      )}
+    </div>
+  </div>
+)}
             </div>
           </div>
         ))}

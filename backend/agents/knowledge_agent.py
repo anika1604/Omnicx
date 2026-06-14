@@ -24,9 +24,13 @@ class KnowledgeAgent(BaseAgent):
         context = ""
         sources = 0
         try:
+            import os
             import chromadb
             from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-            client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
+            chroma_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'chroma_db')
+            )
+            client = chromadb.PersistentClient(path=chroma_path)
             ef = SentenceTransformerEmbeddingFunction(model_name=settings.embedding_model)
             collection = client.get_or_create_collection(name=settings.chroma_collection, embedding_function=ef)
             results = collection.query(query_texts=[inp.message], n_results=3)
@@ -34,8 +38,9 @@ class KnowledgeAgent(BaseAgent):
             if docs:
                 context = "\n\n".join(docs)
                 sources = len(docs)
-        except Exception:
-            pass  # No KB available — use conversation history only
+        except Exception as e:
+            print(f"[KB] {e}")
+            pass
 
         # Build history string
         history_lines = []

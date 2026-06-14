@@ -121,6 +121,54 @@
         "role": "assistant",
         "content": "Your name is Ana! How can I help you today, Ana?"
       }
+    ],
+    "fde9e0a4-3ede-46c0-8042-fe53ca56cf73": [
+      {
+        "ts": 1781435593.3691878,
+        "channel": "web",
+        "role": "user",
+        "content": "What is your return policy?",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781435593.3691878,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Our return policy allows you to return any item within 30 days of purchase for a full refund. Please note that items must be in their original condition to be eligible for a refund. \n\nIf you need help starting a return, just let me know!"
+      }
+    ],
+    "a09b2970-a7c7-4d6b-9574-dab8e90cd4bb": [
+      {
+        "ts": 1781436037.4993582,
+        "channel": "web",
+        "role": "user",
+        "content": "what is your return policy?",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781436037.4993582,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Our return policy allows you to return any item within 30 days of purchase for a full refund. Please note that the items must be in their original condition to be eligible. \n\nIf you need help starting a return or have any other questions, feel free to ask!"
+      }
+    ],
+    "13439cc0-c366-4257-8e11-beec32dbec38": [
+      {
+        "ts": 1781436324.4331377,
+        "channel": "web",
+        "role": "user",
+        "content": "what is your return policy",
+        "intent": "query",
+        "sentiment": "neutral"
+      },
+      {
+        "ts": 1781436324.4331377,
+        "channel": "web",
+        "role": "assistant",
+        "content": "Our return policy allows you to return any item within 30 days of purchase for a full refund. To be eligible for a refund, items must be in their original condition. \n\nOnce we receive your return, refunds are processed within 3-5 business days and credited back to your original payment method."
+      }
     ]
   },
   "customers": {
@@ -129,7 +177,10 @@
       "77363ce9-445e-44f5-b609-66e57171a8b7",
       "52be6999-62a5-4a15-a5e0-951a30cabae9",
       "557575e5-671e-4be8-be73-77a5d57176cf",
-      "157461e5-08b6-43e0-909a-74e4dc5b3206"
+      "157461e5-08b6-43e0-909a-74e4dc5b3206",
+      "fde9e0a4-3ede-46c0-8042-fe53ca56cf73",
+      "a09b2970-a7c7-4d6b-9574-dab8e90cd4bb",
+      "13439cc0-c366-4257-8e11-beec32dbec38"
     ]
   }
 }
