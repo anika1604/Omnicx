@@ -147,17 +147,26 @@ class OrchestratorAgent:
         outputs = state["specialist_outputs"]
         draft   = state["draft_response"]
 
+        # Use knowledge agent answer if available
         if "knowledge" in outputs and outputs["knowledge"].get("answer"):
             final = outputs["knowledge"]["answer"]
         else:
             final = draft if draft else "How can I help you today?"
 
+        # Check escalation
         should_escalate = (
             "escalation" in outputs
             and outputs["escalation"].get("should_escalate", False)
         )
         if should_escalate:
             final += "\n\nI'm connecting you to a specialist who can help further."
+
+        # Proactive churn intervention — append retention offer
+        if "escalation" in outputs:
+            proactive = outputs["escalation"].get("proactive_message")
+            churn_risk = outputs["escalation"].get("churn_risk", 0)
+            if proactive and churn_risk > 0.5:
+                final += f"\n\n💙 {proactive}"
 
         return {**state, "final_response": final, "should_escalate": should_escalate}
 

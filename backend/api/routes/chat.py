@@ -53,13 +53,31 @@ async def chat(req: ChatRequest):
         history  = await memory.get_session_history(session_id)
         cust_ctx = await memory.get_customer_context(req.customer_id)
 
+        # Compute real-time sentiment from current session history
+        sentiments = [t.get('sentiment') for t in history if t.get('sentiment')]
+        frustrated_count = sentiments.count('frustrated')
+        realtime_churn = round(min((frustrated_count / max(len(sentiments), 1)) * 2, 1.0), 2)
+
+        # Use whichever is higher — historical or realtime
+        churn_risk = max(cust_ctx.get('churn_risk', 0.0), realtime_churn)
+
+        print(f"[Churn] customer={req.customer_id} historical={cust_ctx.get('churn_risk')} realtime={realtime_churn} final={churn_risk}")
+
         inp = AgentInput(
             session_id=session_id,
             customer_id=req.customer_id,
             message=req.message,
             channel=req.channel,
             history=history,
-            context={**cust_ctx, **req.metadata},
+            context={
+                **cust_ctx,
+                **req.metadata,
+                'churn_risk': churn_risk,
+                'sentiment': {
+                    'label': sentiments[-1] if sentiments else 'neutral',
+                    'score': 0.85 if frustrated_count > 0 else 0.5,
+                }
+            },
         )
         result = await OrchestratorAgent().run(inp)
 
