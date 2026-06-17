@@ -271,6 +271,112 @@
         "role": "assistant",
         "content": "I am deeply sorry that we have let you down so completely, and I completely understand why you feel this is the worst experience. I want to stop asking you questions and start getting this fixed. I am transferring you directly to a live senior support specialist right now who will prioritize your case and make this right. Please hold on for just a moment.\n\nI'm connecting you to a specialist who can help further.\n\n💙 We value you as a customer and want to make this right immediately. We're sorry for the inconvenience. We'd like to offer you free express shipping on your next 3 orders. A senior customer success manager will also reach out within 2 hours."
       }
+    ],
+    "a7c6d8df-6efd-4a1d-a8fb-bf1b40f74078": [
+      {
+        "ts": 1781671018.3516207,
+        "channel": "web",
+        "role": "user",
+        "content": "this is the most pathetic service",
+        "intent": "complaint",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781671018.3516207,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I am incredibly sorry to hear that you've had such a disappointing experience with our service. This is definitely not the standard we strive for, and I want to make things right. Could you please share a few more details about what happened? I am here to help resolve this for you immediately."
+      },
+      {
+        "ts": 1781671055.2296262,
+        "channel": "web",
+        "role": "user",
+        "content": "i want a refund",
+        "intent": "request_action",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781671055.2296262,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I completely understand your frustration, and I am truly sorry that our service has let you down to this point. I want to help make this right by processing your refund request immediately. To get this started for you right away, could you please provide your order number or the email address associated with your account? I will prioritize this for you."
+      },
+      {
+        "ts": 1781671081.6267924,
+        "channel": "web",
+        "role": "user",
+        "content": "i am frustrated with your services",
+        "intent": "complaint",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781671081.6267924,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I completely understand your frustration, and I am deeply sorry that we have let you down. I want to make this right and process your refund immediately so you don't have to deal with any further hassle. To get this sorted for you right away, could you please share your order number or the email address associated with your account? I am standing by to prioritize this for you."
+      },
+      {
+        "ts": 1781671166.8419409,
+        "channel": "web",
+        "role": "user",
+        "content": "i have never seen a terrible service before",
+        "intent": "complaint",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781671166.8419409,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I am so incredibly sorry. Hearing that this is the worst service you've ever experienced is devastating, and I completely understand your anger. I want to stop this frustrating loop and get your refund processed immediately. Please, just share your order number or the email address associated with your account so I can find your details and issue the refund right away. I am standing by to take care of this for you the second you reply."
+      }
+    ],
+    "4dbb4c27-0fb9-460e-b572-c4ef36b5bb44": [
+      {
+        "ts": 1781671902.6991453,
+        "channel": "web",
+        "role": "user",
+        "content": "I am extremely frustrated",
+        "intent": "complaint",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781671902.6991453,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I am so sorry to hear that you are feeling frustrated. Your experience is very important to us, and I want to help make this right. Please let me know what is going on so I can assist you and get this resolved as quickly as possible."
+      }
+    ],
+    "e3d8ffff-c5e2-4c24-b4ba-f9bcf6684e5c": [
+      {
+        "ts": 1781672169.3986235,
+        "channel": "web",
+        "role": "user",
+        "content": "this is terrible service",
+        "intent": "complaint",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781672169.3986235,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I am incredibly sorry to hear that you've had a bad experience. Your satisfaction is very important to us, and I want to make this right. Could you please share a bit more detail about what happened so I can help resolve this for you immediately?"
+      }
+    ],
+    "514cb7eb-369b-41ab-bd54-5257d52c5db2": [
+      {
+        "ts": 1781672178.8253522,
+        "channel": "web",
+        "role": "user",
+        "content": "I am extremely frustrated and want to cancel",
+        "intent": "churn_signal",
+        "sentiment": "frustrated"
+      },
+      {
+        "ts": 1781672178.8253522,
+        "channel": "web",
+        "role": "assistant",
+        "content": "I am incredibly sorry to hear that you are feeling frustrated, and I completely understand why you'd want to make a change. I want to do everything I can to make this right. Could you please share a bit more about what went wrong? If you still prefer to cancel, I can absolutely guide you through the cancellation process immediately."
+      }
     ]
   },
   "customers": {
@@ -284,7 +390,15 @@
       "a09b2970-a7c7-4d6b-9574-dab8e90cd4bb",
       "13439cc0-c366-4257-8e11-beec32dbec38",
       "7ff7e53d-2c00-43a4-b6f6-a3553e290f12",
-      "bc062aef-5fef-48a1-a4b0-a78df45ebf75"
+      "bc062aef-5fef-48a1-a4b0-a78df45ebf75",
+      "a7c6d8df-6efd-4a1d-a8fb-bf1b40f74078"
+    ],
+    "churn-test-1": [
+      "4dbb4c27-0fb9-460e-b572-c4ef36b5bb44"
+    ],
+    "churn-test-2": [
+      "e3d8ffff-c5e2-4c24-b4ba-f9bcf6684e5c",
+      "514cb7eb-369b-41ab-bd54-5257d52c5db2"
     ]
   }
 }

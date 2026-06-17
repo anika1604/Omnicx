@@ -6,6 +6,16 @@ from pydantic import BaseModel, Field
 from typing import Literal, Optional
 from services.metrics_engine import InteractionMetric, record_metric
 
+# Pre-load agents once at module level (lazy singleton pattern)
+_orchestrator = None
+
+def get_orchestrator():
+    global _orchestrator
+    if _orchestrator is None:
+        from agents.orchestrator import OrchestratorAgent
+        _orchestrator = OrchestratorAgent()
+    return _orchestrator
+
 router = APIRouter()
 
 
@@ -54,14 +64,29 @@ async def chat(req: ChatRequest):
         cust_ctx = await memory.get_customer_context(req.customer_id)
 
         # Compute real-time sentiment from current session history
-        sentiments = [t.get('sentiment') for t in history if t.get('sentiment')]
+        # Compute session features
+        sentiments       = [t.get('sentiment') for t in history if t.get('sentiment')]
         frustrated_count = sentiments.count('frustrated')
-        realtime_churn = round(min((frustrated_count / max(len(sentiments), 1)) * 2, 1.0), 2)
+        frustrated_ratio = frustrated_count / max(len(sentiments), 1)
+        turn_count       = len(history)
+        channel_switches = len(set(t.get('channel', 'web') for t in history)) - 1
 
-        # Use whichever is higher — historical or realtime
-        churn_risk = max(cust_ctx.get('churn_risk', 0.0), realtime_churn)
+        # XGBoost churn prediction
+        try:
+            from ml.churn.predictor import predict_churn_from_session
+            churn_risk = predict_churn_from_session(
+                frustrated_ratio=frustrated_ratio,
+                turn_count=turn_count,
+                channel_switches=max(channel_switches, 0),
+                resolved=not any(t.get('sentiment') == 'frustrated' for t in history[-2:]),
+                avg_handle_time=30.0,
+            )
+        except Exception as ex:
+            print(f"[Churn] predictor error: {ex}")
+            churn_risk = round(min(frustrated_ratio * 2, 1.0), 2)
 
-        print(f"[Churn] customer={req.customer_id} historical={cust_ctx.get('churn_risk')} realtime={realtime_churn} final={churn_risk}")
+        print(f"[Churn] risk={churn_risk} turns={turn_count} frustrated_ratio={frustrated_ratio:.2f}")
+
 
         inp = AgentInput(
             session_id=session_id,
@@ -79,7 +104,7 @@ async def chat(req: ChatRequest):
                 }
             },
         )
-        result = await OrchestratorAgent().run(inp)
+        result = await get_orchestrator().run(inp)
 
     except Exception as e:
         print(f"[Fallback] {type(e).__name__}: {e}")

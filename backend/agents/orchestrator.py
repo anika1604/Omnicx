@@ -128,6 +128,12 @@ class OrchestratorAgent:
             "action":     self.action_agent,
         }
 
+        # Always run escalation and sentiment - critical business logic, not LLM-dependent
+        if 'escalation' not in needed:
+            needed = needed + ['escalation']
+        if 'sentiment' not in needed:
+            needed = needed + ['sentiment']
+
         tasks = {
             name: agent_map[name].run(inp)
             for name in needed if name in agent_map

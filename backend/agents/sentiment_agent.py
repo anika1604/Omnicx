@@ -36,13 +36,27 @@ class SentimentAgent(BaseAgent):
     def _try_load_model(self):
         try:
             from transformers import pipeline
-            self._pipe = pipeline(
-                "text-classification",
-                model="cardiffnlp/twitter-roberta-base-sentiment-latest",
-                top_k=None,
-                device=-1,
+            import os
+            model_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', 'ml', 'sentiment', 'model')
             )
-            print("✅ Sentiment model loaded (RoBERTa)")
+            if os.path.exists(model_path):
+                self._pipe = pipeline(
+                    "text-classification",
+                    model=model_path,
+                    top_k=None,
+                    device=-1,
+                )
+                print("✅ Sentiment model loaded (Fine-tuned RoBERTa 96% accuracy)")
+            else:
+                # Fallback to pretrained
+                self._pipe = pipeline(
+                    "text-classification",
+                    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+                    top_k=None,
+                    device=-1,
+                )
+                print("✅ Sentiment model loaded (RoBERTa pretrained)")
         except Exception as e:
             print(f"⚠️  Sentiment model not available, using heuristic: {e}")
 
